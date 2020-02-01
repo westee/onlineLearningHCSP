@@ -1,14 +1,16 @@
 package com.github;
 
-import java.lang.reflect.Proxy;
+import net.sf.cglib.proxy.Enhancer;
 
 public class Main {
-    static DataService service = new DataServiceImp();
+    static DataServiceImp service = new DataServiceImp();
+
     public static void main(String[] args) {
-        DataService dataService = (DataService) Proxy.newProxyInstance(
-                service.getClass().getClassLoader(),
-                new Class[]{DataService.class},
-                new LogProxy(service));
-        System.out.println("main" + dataService.a(11112222));
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(DataServiceImp.class);
+        enhancer.setCallback(new LogInterceptor(service));
+
+        DataServiceImp enhancedService = (DataServiceImp) enhancer.create();
+        System.out.println(enhancedService.a(1));
     }
 }
